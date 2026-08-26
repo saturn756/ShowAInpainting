@@ -1,4 +1,4 @@
-# Reference-only Anomaly Generation Service
+# Show AI Inpainting
 
 [简体中文](docs/README.zh-CN.md)
 
