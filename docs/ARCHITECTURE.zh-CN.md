@@ -1,4 +1,4 @@
-# 异常图片生成模型 — 架构与实现文档
+# Show AI Inpainting：架构与实现文档
 
 [English](ARCHITECTURE.md)
 

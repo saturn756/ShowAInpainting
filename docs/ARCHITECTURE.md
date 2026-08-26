@@ -1,4 +1,4 @@
-# Anomaly Image Generation Service: Architecture
+# Show AI Inpainting: Architecture
 
 [简体中文](ARCHITECTURE.zh-CN.md)
 

@@ -1,4 +1,4 @@
-# Service Documentation
+# Show AI Inpainting Documentation
 
 This directory contains the interface and architecture documentation for the
 service package. The root [README](../README.md) is the short GitHub entry
