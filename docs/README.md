@@ -29,6 +29,27 @@ authentication, the in-memory task queue, OSS upload policy, and relay
 fallback. The GPU service owns the private key boundary, temporary relay
 storage, runtime adapter, result output, and local archive.
 
+## Interface Preview
+
+<p align="center">
+  <img src="screenshots/01-overview.png" alt="Application overview" width="100%">
+</p>
+
+<p align="center"><em>Application overview and guided workflow</em></p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="screenshots/02-input-and-roi.png" alt="Image input and region selection" width="100%">
+      <br><em>Image input and region selection</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="screenshots/03-result.png" alt="Generated result" width="100%">
+      <br><em>Generated result and task controls</em>
+    </td>
+  </tr>
+</table>
+
 ## Public repository rule
 
 The documents describe interfaces rather than the private research system.

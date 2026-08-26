@@ -35,6 +35,27 @@ which forwards it through the SSH tunnel to temporary GPU relay storage.
 Generated results are encrypted with the user's browser public key before they
 are returned or stored in OSS.
 
+## Interface preview
+
+<p align="center">
+  <img src="docs/screenshots/01-overview.png" alt="Application overview" width="100%">
+</p>
+
+<p align="center"><em>Application overview and guided workflow</em></p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/02-input-and-roi.png" alt="Image input and region selection" width="100%">
+      <br><em>Image input and region selection</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/03-result.png" alt="Generated result" width="100%">
+      <br><em>Generated result and task controls</em>
+    </td>
+  </tr>
+</table>
+
 ## What is included
 
 ```text

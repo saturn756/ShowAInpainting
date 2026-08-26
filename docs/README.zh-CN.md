@@ -33,6 +33,27 @@ SSH 反向隧道 :19944 -> GPU 服务 :7861
 当 OSS 不可用时，浏览器将同一份密文发送到逻辑服务，再通过 SSH 隧道
 转发到 GPU 中继存储。生成结果使用用户浏览器公钥加密后返回或写入 OSS。
 
+## 界面预览
+
+<p align="center">
+  <img src="screenshots/01-overview.png" alt="应用总览" width="100%">
+</p>
+
+<p align="center"><em>应用总览与操作流程</em></p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="screenshots/02-input-and-roi.png" alt="图片输入与区域选择" width="100%">
+      <br><em>图片输入与区域选择</em>
+    </td>
+    <td width="50%" align="center">
+      <img src="screenshots/03-result.png" alt="生成结果" width="100%">
+      <br><em>生成结果与任务控制</em>
+    </td>
+  </tr>
+</table>
+
 ## 项目结构
 
 ```text
