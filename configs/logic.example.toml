@@ -1,0 +1,40 @@
+# Public example. Keep activation/session/API secrets in logic.env.
+
+[server]
+host = "127.0.0.1"
+port = 8000
+
+[auth]
+cookie_name = "anomaly_generation_access"
+session_ttl_seconds = 43200
+activation_max_attempts = 5
+activation_window_seconds = 900
+
+[oss]
+enabled = false
+config_path = "/etc/anomaly-gen/oss.json"
+issued_key_ttl_seconds = 900
+
+[gpu]
+# This is the Logic-side listener of the SSH reverse tunnel.
+url = "http://127.0.0.1:19944"
+relay_upload_timeout_seconds = 120.0
+relay_result_timeout_seconds = 120.0
+public_key_timeout_seconds = 15.0
+public_key_cache_ttl_seconds = 300
+generate_timeout_seconds = 3600.0
+retry_max = 5
+retry_delay_seconds = 10.0
+
+[relay]
+upload_max_bytes = 52428800
+result_ttl_seconds = 86400
+
+[queue]
+task_ttl_seconds = 3600
+max_tasks_per_user = 5
+estimated_seconds_per_task = 8.0
+
+[static]
+cache_dir = "/tmp/anomaly_logic_cache"
+demo_dir = "/var/lib/anomaly-gen/optional-demo"

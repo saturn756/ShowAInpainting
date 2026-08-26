@@ -1,0 +1,17 @@
+[Unit]
+Description=Anomaly Generation Logic Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=anomaly-gen
+WorkingDirectory=/srv/anomaly-logic
+EnvironmentFile=/etc/anomaly-gen/logic.env
+ExecStart=/usr/bin/python3 -m logic_service.main --config /etc/anomaly-gen/logic.toml
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

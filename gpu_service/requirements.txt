@@ -1,0 +1,9 @@
+# GPU 推理服务依赖
+fastapi>=0.100
+uvicorn[standard]
+python-multipart>=0.0.9
+pillow>=10.0
+cryptography>=41
+# OSS
+oss2>=2.19,<3
+tomli>=2.0; python_version < "3.11"

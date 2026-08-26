@@ -1,0 +1,44 @@
+.env
+__pycache__/
+*.py[cod]
+frontend/node_modules/
+frontend/dist/
+.venv/
+logs/
+data/
+platformuse.md
+checkpoint/
+sd-legacy/
+models/image_encoder/
+*.bin
+*.safetensors
+*.pth
+*.pt
+configs/*.local.toml
+configs/*.production.toml
+
+# Credentials, keys, certificates, and runtime state
+*.pem
+*.key
+*.crt
+*.der
+*.log
+*.sqlite3
+*.db
+
+# Private research/runtime files
+gpu_service/model_runtime.py
+inpainting_pipeline.py
+local_loading.py
+models/
+private_runtime/
+
+# Local verification artifacts and test data
+tests/
+test_outputs/
+*_test.py
+*_test.mjs
+test_*.py
+demo_example/
+
+# private research runtime; production loads it from runtime.module_path

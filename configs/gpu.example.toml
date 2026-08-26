@@ -1,0 +1,30 @@
+# Non-secret GPU service configuration.
+# Keep GPU_SERVICE_API_KEY in the environment or a protected EnvironmentFile.
+
+[server]
+host = "127.0.0.1"
+port = 7861
+protocol_version = "1"
+
+[storage]
+oss_enabled = false
+oss_config_path = "/etc/anomaly-gpu/oss.json"
+# output_prefix = "service/output"
+
+[relay]
+storage_dir = "/var/lib/anomaly-gpu/relay"
+max_upload_bytes = 52428800
+ttl_seconds = 3600
+
+[crypto]
+site_private_key_path = "/etc/anomaly-gpu/crypto/site_master_private.pem"
+
+[runtime]
+backend = "mock"
+module = "private_runtime_adapter"
+module_path = ""
+smoke_mode = true
+
+[archive]
+enabled = false
+data_dir = "/var/lib/anomaly-gpu/records"
