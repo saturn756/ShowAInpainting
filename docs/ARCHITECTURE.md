@@ -11,28 +11,6 @@ fallback, and local task archives. The versioned logic-to-GPU contract is in
 
 ## 1. Overall architecture
 
-```text
-                             Browser
-       Vue SPA: activate -> upload -> mask/ROI -> generate -> decrypt result
-          | HTTPS API and same-origin static assets
-          | CSE ciphertext upload
-          v
-    Nginx / HTTPS / static frontend
-          |
-          v
-    Public Logic service :8000
-      | auth, upload policy, queue, task/result API
-      |
-      +-----------------------> Managed object storage
-      |                         ciphertext only
-      |
-      +-- SSH reverse tunnel :19944 -> GPU API :7861
-                                      | auth, relay, CSE, runtime
-                                      | local archive
-                                      v
-                                  GPU host
-```
-
 Normal input and output traffic uses object storage. If object storage is
 unavailable, the browser sends the same CSE ciphertext to the logic service;
 the logic service forwards it through the loopback-bound SSH tunnel to
