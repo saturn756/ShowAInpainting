@@ -10,9 +10,28 @@
 
 ## 一、整体架构
 
-<p align="center">
-  <img src="diagrams/architecture-overview.zh-CN.svg" alt="Show AI Inpainting 服务架构概览" width="100%">
-</p>
+```mermaid
+flowchart TB
+    B["用户浏览器 / Vue 3 SPA<br/>CSE 加密输入并解密结果"]
+    N["Nginx<br/>静态前端"]
+    L["逻辑服务器<br/>FastAPI :8000"]
+    O["OSS 对象存储<br/>只保存密文"]
+    T["SSH 反向隧道<br/>:19944"]
+    G["GPU 服务<br/>FastAPI :7861"]
+    R["私有运行时适配器<br/>模型实现"]
+
+    B -->|"HTTPS：会话、上传策略、任务、轮询"| N
+    N -->|"静态文件和 /api 代理"| L
+    B -->|"浏览器直传 CSE 密文"| O
+    L -->|"正常路径：对象 key 和签名 URL"| O
+    L -->|"故障路径：加密中继"| T
+    T --> G
+    G -->|"加密的输入和结果对象"| O
+    G -->|"私有 generate() 调用"| R
+    O -->|"结果密文，任务完成后只下载一次"| B
+    G -->|"中继结果密文"| L
+    L -->|"任务状态和中继结果"| B
+```
 
 **核心思想**：正常情况下图片通过 OSS 中转；OSS 不可用时，浏览器把同一份 CSE 密文发到公网逻辑层，再通过 SSH 隧道送到 GPU 本地中继目录。两条路径都只把密文交给中间层，GPU 仅在推理前用站点私钥解密，结果也可经逻辑层中继返回浏览器。
 

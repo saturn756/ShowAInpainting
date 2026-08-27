@@ -11,9 +11,28 @@ fallback, and local task archives. The versioned logic-to-GPU contract is in
 
 ## 1. Overall architecture
 
-<p align="center">
-  <img src="diagrams/architecture-overview.svg" alt="Show AI Inpainting service architecture overview" width="100%">
-</p>
+```mermaid
+flowchart TB
+    B["Browser / Vue 3 SPA<br/>CSE encrypts inputs and decrypts results"]
+    N["Nginx<br/>static frontend"]
+    L["Logic service<br/>FastAPI :8000"]
+    O["OSS object storage<br/>ciphertext only"]
+    T["SSH reverse tunnel<br/>:19944"]
+    G["GPU service<br/>FastAPI :7861"]
+    R["Private runtime adapter<br/>model implementation"]
+
+    B -->|"HTTPS: session, upload policy, tasks, polling"| N
+    N -->|"static files and /api proxy"| L
+    B -->|"direct encrypted upload"| O
+    L -->|"normal: object keys and signed URL"| O
+    L -->|"fallback: encrypted relay"| T
+    T --> G
+    G -->|"encrypted input and result objects"| O
+    G -->|"private generate() call"| R
+    O -->|"encrypted result, one fetch after done"| B
+    G -->|"fallback result ciphertext"| L
+    L -->|"task status and relay result"| B
+```
 
 Normal input and output traffic uses object storage. If object storage is
 unavailable, the browser sends the same CSE ciphertext to the logic service;
