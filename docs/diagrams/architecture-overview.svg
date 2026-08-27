@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 680" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
   <title id="title">Show AI Inpainting service architecture overview</title>
-  <desc id="desc">Browser and Nginx connect to the logic service. The logic service uses OSS for normal encrypted object storage or an SSH reverse tunnel to the private GPU service. The GPU service calls the private runtime and exchanges encrypted objects with OSS.</desc>
+  <desc id="desc">The browser uploads encrypted inputs to OSS. The GPU service downloads encrypted inputs from OSS, runs the private runtime, uploads the encrypted generated result to OSS, and the browser downloads the result ciphertext from OSS. The logic service provides API orchestration and an SSH relay fallback.</desc>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L10,4 L0,8 Z" fill="#64748b"/>
@@ -27,7 +27,7 @@
     </style>
   </defs>
 
-  <rect class="bg" width="1280" height="680"/>
+  <rect class="bg" width="1280" height="760"/>
 
   <!-- Core request path -->
   <path class="edge" d="M270 235 H330"/>
@@ -38,8 +38,9 @@
 
   <!-- Normal encrypted object-storage path -->
   <path class="edge" d="M880 220 H950"/>
-  <path class="edge" d="M1085 380 C1185 345 1185 320 1085 290"/>
-  <path class="edge" d="M950 620 C700 620 340 620 155 290"/>
+  <path class="edge" d="M950 275 C870 310 870 375 950 420"/>
+  <path class="edge" d="M1220 420 C1260 380 1260 320 1220 275"/>
+  <path class="edge" d="M1210 290 C1260 360 1260 690 1150 700 H300 C220 700 180 560 155 290"/>
 
   <!-- Direct upload and fallback paths -->
   <path class="edge-dashed" d="M155 180 C155 70 1085 70 1085 180"/>
@@ -82,17 +83,19 @@
 
   <rect class="label-bg" x="495" y="51" width="290" height="30"/>
   <text class="label" x="640" y="72">direct encrypted upload</text>
-  <rect class="label-bg" x="860" y="138" width="190" height="30"/>
-  <text class="label" x="955" y="159">normal object keys</text>
+  <rect class="label-bg" x="825" y="138" width="235" height="30"/>
+  <text class="label" x="942" y="159">upload policy and signed URL</text>
   <rect class="label-bg" x="505" y="330" width="250" height="30"/>
   <text class="label" x="630" y="351">fallback encrypted relay</text>
-  <rect class="label-bg" x="880" y="330" width="245" height="30"/>
-  <text class="label" x="1002" y="351">encrypted input and result objects</text>
-  <rect class="label-bg" x="495" y="620" width="275" height="30"/>
-  <text class="label" x="632" y="641">result ciphertext, fetched once after done</text>
+  <rect class="label-bg" x="755" y="330" width="205" height="30"/>
+  <text class="label" x="857" y="351">encrypted input download</text>
+  <rect class="label-bg" x="1000" y="330" width="220" height="30"/>
+  <text class="label" x="1110" y="351">encrypted result upload</text>
+  <rect class="label-bg" x="495" y="675" width="275" height="30"/>
+  <text class="label" x="632" y="696">result ciphertext, fetched once after done</text>
 
-  <line x1="40" y1="665" x2="92" y2="665" stroke="#64748b" stroke-width="2.5"/>
-  <text class="legend" x="102" y="670">API or data flow</text>
-  <line x1="245" y1="665" x2="297" y2="665" stroke="#d97706" stroke-width="2.5" stroke-dasharray="9 7"/>
-  <text class="legend" x="307" y="670">direct upload or fallback</text>
+  <line x1="40" y1="735" x2="92" y2="735" stroke="#64748b" stroke-width="2.5"/>
+  <text class="legend" x="102" y="740">API or data flow</text>
+  <line x1="245" y1="735" x2="297" y2="735" stroke="#d97706" stroke-width="2.5" stroke-dasharray="9 7"/>
+  <text class="legend" x="307" y="740">direct upload or fallback</text>
 </svg>
