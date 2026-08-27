@@ -10,6 +10,10 @@
 
 ## 一、整体架构
 
+<p align="center">
+  <img src="diagrams/architecture-overview.zh-CN.svg" alt="Show AI Inpainting 服务架构概览" width="100%">
+</p>
+
 **核心思想**：正常情况下图片通过 OSS 中转；OSS 不可用时，浏览器把同一份 CSE 密文发到公网逻辑层，再通过 SSH 隧道送到 GPU 本地中继目录。两条路径都只把密文交给中间层，GPU 仅在推理前用站点私钥解密，结果也可经逻辑层中继返回浏览器。
 
 ### 1.1 一次任务的详细请求与数据流

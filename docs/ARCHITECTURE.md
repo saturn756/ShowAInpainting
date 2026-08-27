@@ -11,6 +11,10 @@ fallback, and local task archives. The versioned logic-to-GPU contract is in
 
 ## 1. Overall architecture
 
+<p align="center">
+  <img src="diagrams/architecture-overview.svg" alt="Show AI Inpainting service architecture overview" width="100%">
+</p>
+
 Normal input and output traffic uses object storage. If object storage is
 unavailable, the browser sends the same CSE ciphertext to the logic service;
 the logic service forwards it through the loopback-bound SSH tunnel to

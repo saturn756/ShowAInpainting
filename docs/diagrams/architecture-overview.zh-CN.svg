@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 680" role="img" aria-labelledby="title desc">
+  <title id="title">Show AI Inpainting 服务架构概览</title>
+  <desc id="desc">用户浏览器和 Nginx 连接逻辑服务器。逻辑服务器正常使用 OSS 加密对象存储，故障时通过 SSH 反向隧道连接私有 GPU 服务。GPU 服务调用私有运行时，并和 OSS 交换加密对象。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-dashed" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#d97706"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { stroke-width: 2; rx: 12; }
+      .browser { fill: #eff6ff; stroke: #2563eb; }
+      .edge-node { fill: #f8fafc; stroke: #64748b; }
+      .logic { fill: #ecfeff; stroke: #0f766e; }
+      .storage { fill: #fffbeb; stroke: #d97706; }
+      .private { fill: #fef2f2; stroke: #dc2626; }
+      .runtime { fill: #f5f3ff; stroke: #7c3aed; }
+      .title { font: 600 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; text-anchor: middle; }
+      .meta { font: 400 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; text-anchor: middle; }
+      .edge { fill: none; stroke: #64748b; stroke-width: 2.5; marker-end: url(#arrow); }
+      .edge-dashed { fill: none; stroke: #d97706; stroke-width: 2.5; stroke-dasharray: 9 7; marker-end: url(#arrow-dashed); }
+      .label-bg { fill: #ffffff; opacity: .94; }
+      .label { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; text-anchor: middle; }
+      .legend { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1280" height="680"/>
+
+  <!-- 核心请求路径 -->
+  <path class="edge" d="M270 235 H330"/>
+  <path class="edge" d="M550 235 H610"/>
+  <path class="edge" d="M745 290 V420"/>
+  <path class="edge" d="M880 475 H950"/>
+  <path class="edge" d="M1085 510 V570"/>
+
+  <!-- 正常加密对象存储路径 -->
+  <path class="edge" d="M880 220 H950"/>
+  <path class="edge" d="M1085 380 C1185 345 1185 320 1085 290"/>
+  <path class="edge" d="M950 620 C700 620 340 620 155 290"/>
+
+  <!-- 直传与故障中继路径 -->
+  <path class="edge-dashed" d="M155 180 C155 70 1085 70 1085 180"/>
+  <path class="edge-dashed" d="M155 290 C155 340 520 340 745 290"/>
+
+  <rect class="box browser" x="40" y="180" width="230" height="110"/>
+  <text class="title" x="155" y="215">用户浏览器 / Vue 3 SPA</text>
+  <text class="meta" x="155" y="244">CSE 加密输入</text>
+  <text class="meta" x="155" y="268">并解密结果</text>
+
+  <rect class="box edge-node" x="330" y="180" width="220" height="110"/>
+  <text class="title" x="440" y="220">Nginx</text>
+  <text class="meta" x="440" y="248">HTTPS 和静态前端</text>
+  <text class="meta" x="440" y="272">API 反向代理</text>
+
+  <rect class="box logic" x="610" y="180" width="270" height="110"/>
+  <text class="title" x="745" y="215">逻辑服务器</text>
+  <text class="meta" x="745" y="244">FastAPI :8000</text>
+  <text class="meta" x="745" y="268">认证、队列和任务 API</text>
+
+  <rect class="box storage" x="950" y="180" width="270" height="110"/>
+  <text class="title" x="1085" y="215">OSS 对象存储</text>
+  <text class="meta" x="1085" y="244">只保存密文</text>
+  <text class="meta" x="1085" y="268">签名结果 URL</text>
+
+  <rect class="box edge-node" x="610" y="420" width="270" height="110"/>
+  <text class="title" x="745" y="455">SSH 反向隧道</text>
+  <text class="meta" x="745" y="484">回环地址 :19944</text>
+  <text class="meta" x="745" y="508">私有传输通道</text>
+
+  <rect class="box private" x="950" y="380" width="270" height="130"/>
+  <text class="title" x="1085" y="415">GPU 服务</text>
+  <text class="meta" x="1085" y="444">FastAPI :7861</text>
+  <text class="meta" x="1085" y="468">CSE 边界和中继</text>
+  <text class="meta" x="1085" y="492">临时本地存档</text>
+
+  <rect class="box runtime" x="950" y="570" width="270" height="80"/>
+  <text class="title" x="1085" y="603">私有运行时适配器</text>
+  <text class="meta" x="1085" y="628">generate() / 模型实现</text>
+
+  <rect class="label-bg" x="495" y="51" width="290" height="30"/>
+  <text class="label" x="640" y="72">浏览器直传加密密文</text>
+  <rect class="label-bg" x="860" y="138" width="190" height="30"/>
+  <text class="label" x="955" y="159">正常对象 key</text>
+  <rect class="label-bg" x="505" y="330" width="250" height="30"/>
+  <text class="label" x="630" y="351">故障路径：加密中继</text>
+  <rect class="label-bg" x="880" y="330" width="245" height="30"/>
+  <text class="label" x="1002" y="351">加密的输入和结果对象</text>
+  <rect class="label-bg" x="495" y="620" width="275" height="30"/>
+  <text class="label" x="632" y="641">结果密文，完成后只下载一次</text>
+
+  <line x1="40" y1="665" x2="92" y2="665" stroke="#64748b" stroke-width="2.5"/>
+  <text class="legend" x="102" y="670">API 或数据流</text>
+  <line x1="245" y1="665" x2="297" y2="665" stroke="#d97706" stroke-width="2.5" stroke-dasharray="9 7"/>
+  <text class="legend" x="307" y="670">直传或故障中继</text>
+</svg>
