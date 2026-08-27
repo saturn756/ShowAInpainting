@@ -41,6 +41,105 @@
 
 **核心思想**：正常情况下图片通过 OSS 中转；OSS 不可用时，浏览器把同一份 CSE 密文发到公网逻辑层，再通过 SSH 隧道送到 GPU 本地中继目录。两条路径都只把密文交给中间层，GPU 仅在推理前用站点私钥解密，结果也可经逻辑层中继返回浏览器。
 
+### 1.1 一次任务的详细请求与数据流
+
+下面的时序图跟踪一次任务从浏览器加密到结果展示的完整过程。浏览器
+是在 GPU 处理期间轮询逻辑层，而不是轮询 OSS；只有任务完成并拿到签名
+结果 URL 后，浏览器才从 OSS 下载一次结果密文。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant B as "浏览器"
+    participant L as "逻辑服务器"
+    participant O as "OSS 对象存储"
+    participant G as "GPU 服务"
+    participant R as "私有推理运行时"
+
+    Note over B: 输入明文和浏览器私钥只留在浏览器本地。
+    B->>L: GET /api/crypto/public-key
+    L-->>B: 站点公钥 + kid
+    B->>B: 生成 DK 和 IV
+    B->>B: AES-256-GCM 加密图片
+    B->>B: RSA-OAEP(SHA-256) 封装 DK
+    Note over B: 上传单元 = 密文 + IV/WK/KID 元数据
+
+    alt 浏览器直传 OSS 成功
+        B->>L: POST /api/oss/upload-policy
+        L-->>B: 短时有效的 OSS POST 策略
+        B->>O: POST 密文 + crypto 元数据
+        O-->>B: 204 + 对象 key
+    else 直传失败，但 OSS 代理成功
+        B->>L: POST /api/oss/proxy-upload
+        Note over L: 逻辑层只在传输过程中持有密文。
+        L->>O: PUT 密文 + crypto 元数据
+        O-->>L: 对象 key
+        L-->>B: 对象 key
+    else OSS 不可用
+        B->>L: POST /api/relay/upload
+        L->>G: POST /relay/upload，经 SSH 反向隧道
+        Note over L,G: Bearer API key；密文 + crypto 元数据
+        G-->>L: relay://input-id
+        L-->>B: relay://input-id
+    end
+
+    B->>L: POST /api/tasks
+    Note over B,L: 对象 key + ROI/步数/引导强度/seed + 浏览器公钥
+    L-->>B: task_id + status=queued
+
+    par 浏览器轮询
+        loop 每 2 秒，直到 done 或 failed
+            B->>L: GET /api/tasks/{task_id}
+            alt queued 或 generating
+                L-->>B: status + queue_ahead
+            else done
+                L-->>B: done + result_url + crypto_iv + crypto_wk
+            else failed
+                L-->>B: failed + error
+            end
+        end
+    and 逻辑层队列 worker
+        L->>G: POST /generate
+        Note over L,G: 对象 key + 生成参数 + 用户公钥
+        alt 输入 key 是 OSS 对象 key
+            G->>O: GET 加密输入对象 + 元数据
+            O-->>G: 密文 + crypto 元数据
+        else 输入 key 是 relay://
+            G->>G: 读取 GPU 临时中继对象
+        end
+        G->>G: 用站点私钥解开 DK
+        G->>G: AES-GCM 解密为临时明文文件
+        G->>R: generate(归一化输入、ROI、seed、步数、引导强度)
+        R-->>G: 明文生成图片
+        G->>G: 用浏览器公钥加密结果
+        Note over G: 结果单元 = 密文 + 结果 IV/WK 元数据
+        alt 结果上传 OSS 成功
+            G->>O: PUT 结果密文 + crypto 元数据
+            O-->>G: 结果对象 key
+            G->>G: 生成签名 GET URL（TTL 3600 秒）
+            G-->>L: result_key + 签名 result_url + IV/WK
+        else 结果上传 OSS 失败
+            G->>G: 将结果密文写入 GPU 中继存储
+            G-->>L: relay://result-id + IV/WK
+            L->>L: 将 relay:// 映射为 /api/relay/result/{id}
+        end
+        L->>L: 保存结果元数据并将任务设为 done
+    end
+
+    alt result_url 是 OSS 签名 URL
+        B->>O: GET 签名结果 URL（只下载一次，不带 Cookie）
+        O-->>B: 结果密文字节
+    else result_url 是 /api/relay/result/{id}
+        B->>L: GET 中继结果（带 session Cookie）
+        L->>G: GET /relay/result/{id}，经 SSH 隧道
+        G-->>L: 结果密文字节
+        L-->>B: 结果密文字节
+    end
+    B->>B: RSA-OAEP 解开结果 DK
+    B->>B: AES-GCM 解密结果
+    B->>B: 生成 Blob URL 并展示图片
+```
+
 ---
 
 ## 二、三端职责

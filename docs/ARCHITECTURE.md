@@ -40,6 +40,106 @@ temporary GPU relay storage. The GPU decrypts only immediately before image
 processing and inference. Results are encrypted for the browser before they
 are uploaded or relayed back.
 
+### 1.1 Detailed request and data flow
+
+The diagram below follows one generation task from browser-side encryption to
+result display. The browser polls the logic service while the logic queue
+worker is calling the GPU service; it does not poll OSS. OSS is fetched only
+once after a completed task returns a signed result URL.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant B as "Browser"
+    participant L as "Logic service"
+    participant O as "OSS"
+    participant G as "GPU service"
+    participant R as "Private runtime"
+
+    Note over B: Plaintext input and browser private key stay local.
+    B->>L: GET /api/crypto/public-key
+    L-->>B: site public key + kid
+    B->>B: Create DK and IV
+    B->>B: AES-256-GCM encrypt file
+    B->>B: RSA-OAEP(SHA-256) wrap DK
+    Note over B: Upload unit = ciphertext + IV/WK/KID metadata
+
+    alt Direct OSS upload succeeds
+        B->>L: POST /api/oss/upload-policy
+        L-->>B: Short-lived OSS POST policy
+        B->>O: POST ciphertext + crypto metadata
+        O-->>B: 204 + object key
+    else Direct upload fails, OSS proxy succeeds
+        B->>L: POST /api/oss/proxy-upload
+        Note over L: Logic service holds ciphertext in transit only.
+        L->>O: PUT ciphertext + crypto metadata
+        O-->>L: object key
+        L-->>B: object key
+    else OSS unavailable
+        B->>L: POST /api/relay/upload
+        L->>G: POST /relay/upload over SSH reverse tunnel
+        Note over L,G: Bearer API key; ciphertext + crypto metadata
+        G-->>L: relay://input-id
+        L-->>B: relay://input-id
+    end
+
+    B->>L: POST /api/tasks
+    Note over B,L: object keys + ROI/steps/scale/seed + browser public key
+    L-->>B: task_id + status=queued
+
+    par Browser poller
+        loop Every 2 seconds until done or failed
+            B->>L: GET /api/tasks/{task_id}
+            alt queued or generating
+                L-->>B: status + queue_ahead
+            else done
+                L-->>B: done + result_url + crypto_iv + crypto_wk
+            else failed
+                L-->>B: failed + error
+            end
+        end
+    and Logic queue worker
+        L->>G: POST /generate
+        Note over L,G: object keys + generation parameters + user public key
+        alt Input key is an OSS object key
+            G->>O: GET encrypted input object + metadata
+            O-->>G: ciphertext + crypto metadata
+        else Input key is relay://
+            G->>G: Read temporary relay object
+        end
+        G->>G: Site private key unwraps DK
+        G->>G: AES-GCM decrypts to temporary plaintext files
+        G->>R: generate(normalized inputs, ROI, seed, steps, scale)
+        R-->>G: plaintext generated image
+        G->>G: Encrypt result for browser public key
+        Note over G: Result unit = ciphertext + result IV/WK metadata
+        alt OSS result upload succeeds
+            G->>O: PUT encrypted result + crypto metadata
+            O-->>G: result object key
+            G->>G: Create signed GET URL (TTL 3600s)
+            G-->>L: result_key + signed result_url + IV/WK
+        else OSS result upload unavailable
+            G->>G: Store encrypted result in relay storage
+            G-->>L: relay://result-id + IV/WK
+            L->>L: Map relay:// to /api/relay/result/{id}
+        end
+        L->>L: Save result metadata and set task state=done
+    end
+
+    alt result_url is an OSS signed URL
+        B->>O: GET signed result URL (one fetch, credentials omitted)
+        O-->>B: encrypted result bytes
+    else result_url is /api/relay/result/{id}
+        B->>L: GET relay result (session cookie)
+        L->>G: GET /relay/result/{id} over SSH tunnel
+        G-->>L: encrypted result bytes
+        L-->>B: encrypted result bytes
+    end
+    B->>B: RSA-OAEP unwraps result DK
+    B->>B: AES-GCM decrypts result
+    B->>B: Create Blob URL and display image
+```
+
 ## 2. Component responsibilities
 
 | Component | Technology | Default port | Responsibility |
