@@ -10,22 +10,31 @@ while model weights and research code remain outside the public source tree.
 
 ## Architecture at a glance
 
-```text
-Browser
-  | HTTPS: session, encrypted upload, task polling, result decryption
-  v
-Nginx / static frontend
-  v
-Logic service :8000
-  | normal: OSS object keys and signed result URLs
-  | fallback: encrypted multipart relay
-  v
-SSH reverse tunnel :19944 -> GPU service :7861
-                                      |
-                                      +-- CSE decrypt/encrypt boundary
-                                      +-- private runtime adapter
-                                      +-- local task archive
+```mermaid
+flowchart TB
+    B["Browser / Vue 3 SPA<br/>CSE encrypts inputs and decrypts results"]
+    N["Nginx<br/>static frontend"]
+    L["Logic service<br/>FastAPI :8000"]
+    O["OSS object storage<br/>ciphertext only"]
+    T["SSH reverse tunnel<br/>:19944"]
+    G["GPU service<br/>FastAPI :7861"]
+    R["Private runtime adapter<br/>model implementation"]
+
+    B -->|"HTTPS: session, upload policy, tasks, polling"| N
+    N -->|"static files and /api proxy"| L
+    B -->|"direct encrypted upload"| O
+    L -->|"normal: object keys and signed URL"| O
+    L -->|"fallback: encrypted relay"| T
+    T --> G
+    G -->|"encrypted input and result objects"| O
+    G -->|"private generate() call"| R
+    O -->|"encrypted result, one fetch after done"| B
+    G -->|"fallback result ciphertext"| L
+    L -->|"task status and relay result"| B
 ```
+
+The request-level sequence and data-flow diagram is in
+[Architecture and data flow](docs/ARCHITECTURE.md).
 
 The browser encrypts each input file with AES-256-GCM and wraps the data key
 with the GPU site's RSA public key. OSS and the logic server only handle
