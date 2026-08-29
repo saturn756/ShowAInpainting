@@ -12,11 +12,7 @@ while model weights and research code remain outside the public source tree.
 
 ## Architecture at a glance
 
-<p align="center">
-  <img src="docs/diagrams/architecture.en.png" alt="Show AI Inpainting service architecture" width="100%">
-</p>
-
-The [interactive English preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) and [interactive Chinese preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) are self-contained HTML artifacts. GitHub renders the PNG above directly; the interactive links require GitHub Pages to be enabled for the repository.
+The [interactive English preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) and [interactive Chinese preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) are standalone HTML viewers. Static PNG exports are available as [English](docs/diagrams/architecture.en.png) and [简体中文](docs/diagrams/architecture.zh-CN.png). The interactive links are served by the GitHub Pages workflow in `.github/workflows/pages.yml`.
 
 The request-level sequence and data-flow diagram is in
 [Architecture and data flow](docs/ARCHITECTURE.md).

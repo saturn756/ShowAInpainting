@@ -18,17 +18,14 @@ data flow, followed by the private GPU contract and configuration reference.
 
 ## Architecture previews
 
-<p align="center">
-  <img src="diagrams/architecture.en.png" alt="Show AI Inpainting service architecture" width="100%">
-</p>
-
 | Language | Static preview | Interactive preview |
 |---|---|---|
 | English | [PNG](diagrams/architecture.en.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) |
 | 简体中文 | [PNG](diagrams/architecture.zh-CN.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) |
 
-The PNG files render directly on GitHub. The HTML files are self-contained
-interactive viewers and require GitHub Pages to be enabled for the repository.
+The PNG files remain available as downloadable static previews. The HTML files
+are standalone interactive viewers deployed by the GitHub Pages workflow. Set
+the repository Pages source to GitHub Actions once in repository settings.
 
 ## Service boundary
 

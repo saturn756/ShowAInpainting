@@ -8,17 +8,14 @@ GPU 服务 API、客户端加密、OSS 故障中继和部署配置从研究代�
 
 ## 架构图预览
 
-<p align="center">
-  <img src="diagrams/architecture.zh-CN.png" alt="Show AI Inpainting 服务架构" width="100%">
-</p>
-
 | 语言 | 静态预览 | 交互预览 |
 |---|---|---|
 | English | [PNG](diagrams/architecture.en.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) |
 | 简体中文 | [PNG](diagrams/architecture.zh-CN.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) |
 
-PNG 文件可以直接在 GitHub 页面显示。HTML 是自包含的交互式查看器，
-需要先为仓库启用 GitHub Pages 才能通过在线链接打开。
+PNG 文件仍保留在仓库中，可作为静态预览下载。HTML 是由 GitHub Pages
+工作流部署的独立交互式查看器，需要在仓库设置中将 Pages 来源设置为
+GitHub Actions 一次。
 
 模型权重、研究代码、私有运行时、站点私钥、OSS 凭证和生产数据不包含在
 公开仓库中，而是通过部署环境和受保护配置注入。
