@@ -2,6 +2,8 @@
 
 [简体中文](docs/README.zh-CN.md)
 
+[Interactive architecture preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) · [中文交互预览](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html)
+
 This repository contains the deployable service boundary for an industrial
 anomaly-image generation application. It is intentionally separated from the
 research repository: the frontend, public orchestration layer, private GPU API,
@@ -10,28 +12,11 @@ while model weights and research code remain outside the public source tree.
 
 ## Architecture at a glance
 
-```mermaid
-flowchart TB
-    B["Browser / Vue 3 SPA<br/>CSE encrypts inputs and decrypts results"]
-    N["Nginx<br/>static frontend"]
-    L["Logic service<br/>FastAPI :8000"]
-    O["OSS object storage<br/>ciphertext only"]
-    T["SSH reverse tunnel<br/>:19944"]
-    G["GPU service<br/>FastAPI :7861"]
-    R["Private runtime adapter<br/>model implementation"]
+<p align="center">
+  <img src="docs/diagrams/architecture.en.png" alt="Show AI Inpainting service architecture" width="100%">
+</p>
 
-    B -->|"HTTPS: session, upload policy, tasks, polling"| N
-    N -->|"static files and /api proxy"| L
-    B -->|"direct encrypted upload"| O
-    L -->|"normal: object keys and signed URL"| O
-    L -->|"fallback: encrypted relay"| T
-    T --> G
-    G -->|"encrypted input and result objects"| O
-    G -->|"private generate() call"| R
-    O -->|"encrypted result, one fetch after done"| B
-    G -->|"fallback result ciphertext"| L
-    L -->|"task status and relay result"| B
-```
+The [interactive English preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) and [interactive Chinese preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) are self-contained HTML artifacts. GitHub renders the PNG above directly; the interactive links require GitHub Pages to be enabled for the repository.
 
 The request-level sequence and data-flow diagram is in
 [Architecture and data flow](docs/ARCHITECTURE.md).

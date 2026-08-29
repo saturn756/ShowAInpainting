@@ -6,33 +6,24 @@
 GPU 服务 API、客户端加密、OSS 故障中继和部署配置从研究代码中分离出来，
 便于作为独立工程维护和公开展示。
 
+## 架构图预览
+
+<p align="center">
+  <img src="diagrams/architecture.zh-CN.png" alt="Show AI Inpainting 服务架构" width="100%">
+</p>
+
+| 语言 | 静态预览 | 交互预览 |
+|---|---|---|
+| English | [PNG](diagrams/architecture.en.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) |
+| 简体中文 | [PNG](diagrams/architecture.zh-CN.png) | [HTML](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) |
+
+PNG 文件可以直接在 GitHub 页面显示。HTML 是自包含的交互式查看器，
+需要先为仓库启用 GitHub Pages 才能通过在线链接打开。
+
 模型权重、研究代码、私有运行时、站点私钥、OSS 凭证和生产数据不包含在
 公开仓库中，而是通过部署环境和受保护配置注入。
 
 ## 架构概览
-
-```mermaid
-flowchart TB
-    B["用户浏览器 / Vue 3 SPA<br/>CSE 加密输入并解密结果"]
-    N["Nginx<br/>静态前端"]
-    L["逻辑服务器<br/>FastAPI :8000"]
-    O["OSS 对象存储<br/>只保存密文"]
-    T["SSH 反向隧道<br/>:19944"]
-    G["GPU 服务<br/>FastAPI :7861"]
-    R["私有运行时适配器<br/>模型实现"]
-
-    B -->|"HTTPS：会话、上传策略、任务、轮询"| N
-    N -->|"静态文件和 /api 代理"| L
-    B -->|"浏览器直传 CSE 密文"| O
-    L -->|"正常路径：对象 key 和签名 URL"| O
-    L -->|"故障路径：加密中继"| T
-    T --> G
-    G -->|"加密的输入和结果对象"| O
-    G -->|"私有 generate() 调用"| R
-    O -->|"结果密文，任务完成后只下载一次"| B
-    G -->|"中继结果密文"| L
-    L -->|"任务状态和中继结果"| B
-```
 
 请求级时序图和详细数据流见
 [架构与数据流](ARCHITECTURE.zh-CN.md)。
