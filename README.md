@@ -12,7 +12,30 @@ while model weights and research code remain outside the public source tree.
 
 ## Architecture at a glance
 
-The [interactive English preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) and [interactive Chinese preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) are standalone HTML viewers. Static PNG exports are available as [English](docs/diagrams/architecture.en.png) and [简体中文](docs/diagrams/architecture.zh-CN.png). The interactive links are served by the GitHub Pages workflow in `.github/workflows/pages.yml`.
+```mermaid
+flowchart TB
+    B["Browser / Vue 3 SPA<br/>CSE encrypts inputs and decrypts results"]
+    N["Nginx<br/>static frontend"]
+    L["Logic service<br/>FastAPI :8000"]
+    O["OSS object storage<br/>ciphertext only"]
+    T["SSH reverse tunnel<br/>:19944"]
+    G["GPU service<br/>FastAPI :7861"]
+    R["Private runtime adapter<br/>model implementation"]
+
+    B -->|"HTTPS: session, upload policy, tasks, polling"| N
+    N -->|"static files and /api proxy"| L
+    B -->|"direct encrypted upload"| O
+    L -->|"normal: object keys and signed URL"| O
+    L -->|"fallback: encrypted relay"| T
+    T --> G
+    G -->|"encrypted input and result objects"| O
+    G -->|"private generate() call"| R
+    O -->|"encrypted result, one fetch after done"| B
+    G -->|"fallback result ciphertext"| L
+    L -->|"task status and relay result"| B
+```
+
+The [interactive English preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.en.html) and [interactive Chinese preview](https://saturn756.github.io/ShowAInpainting/diagrams/architecture.zh-CN.html) are standalone HTML viewers. Static PNG exports remain available as [English](docs/diagrams/architecture.en.png) and [简体中文](docs/diagrams/architecture.zh-CN.png). The interactive links are served by the GitHub Pages workflow in `.github/workflows/pages.yml`.
 
 The request-level sequence and data-flow diagram is in
 [Architecture and data flow](docs/ARCHITECTURE.md).
