@@ -151,6 +151,10 @@ OSS 凭证或包含敏感信息的私有路径提交到 Git。
 5. 在逻辑主机 loopback 地址启动 `8000` 端口的逻辑服务。
 6. 构建 `frontend/dist/`，部署到 Nginx 文档根目录，并将 `/api/` 和
    `/cache/` 代理到逻辑服务。
+7. 在受保护 OSS 配置所引用的准确 Bucket 上配置 CORS：允许精确的前端
+   HTTPS 域名，允许 `GET`、`POST`、`PUT`、`DELETE`、`HEAD`，允许 Headers
+   为 `*`，并暴露 `ETag`、`Content-Type`、`Content-Length`。阿里云控制台
+   可能不显示 `OPTIONS`，这是正常的，OSS 会自动处理预检请求。
 
 `deploy/` 中的 unit 文件展示了推荐的 systemd 边界。对外公开的只有
    HTTPS 后的逻辑服务；GPU 端口和 SSH 监听端口都应保持 loopback。

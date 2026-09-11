@@ -153,6 +153,11 @@ secrets into a committed configuration file.
 5. Start `logic_service.main` on loopback port `8000`.
 6. Build `frontend/dist/`, deploy it as the Nginx document root, and proxy
    `/api/` and `/cache/` to the logic service.
+7. Configure CORS on the exact OSS bucket used by the protected OSS config:
+   allow the exact frontend HTTPS origin, methods `GET`, `POST`, `PUT`, `DELETE`,
+   and `HEAD`, request headers `*`, and expose `ETag`, `Content-Type`, and
+   `Content-Length`. The Aliyun console may not show `OPTIONS`; OSS handles it
+   automatically.
 
 The example unit files in `deploy/` show the intended systemd boundary. The
 only public-facing process is the logic service behind HTTPS; the GPU port and

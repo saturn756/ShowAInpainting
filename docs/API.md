@@ -104,6 +104,15 @@ The browser posts the returned fields, the CSE metadata fields, and the
 ciphertext file directly to the returned OSS URL. The logic service tracks the
 issued key so that only the issuing session can use it.
 
+When using direct OSS upload or the normal signed-result path, configure CORS
+on that exact OSS bucket. The browser needs `POST` for policy uploads and `GET`
+for fetching the encrypted result before local decryption. Use the exact HTTPS
+frontend origin as the allowed origin, allow `GET`, `POST`, `PUT`, `DELETE`, and
+`HEAD`, and allow the request headers required by the upload form. The Aliyun
+console may omit `OPTIONS`; OSS handles the browser preflight automatically.
+Server-side SDK access can still work when this browser CORS rule is missing,
+so a successful backend upload alone does not verify the frontend path.
+
 ### `POST /api/oss/proxy-upload`
 
 Requires the session cookie. Multipart fields:

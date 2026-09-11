@@ -101,6 +101,13 @@
 浏览器将响应中的 fields、CSE 元数据和密文文件直接 POST 到返回的 OSS
 地址。逻辑服务会记录已签发的 object key，只有签发它的会话可以使用。
 
+使用 OSS 直传或正常的签名结果路径时，必须在上述准确的 OSS Bucket 上配置
+CORS。浏览器需要用 `POST` 上传策略文件，并用 `GET` 拉取加密结果后在本地解密。
+建议把准确的 HTTPS 前端域名设为允许来源，允许 `GET`、`POST`、`PUT`、`DELETE`、
+`HEAD`，并允许上传表单所需的请求 Headers。阿里云控制台可能不提供
+`OPTIONS` 选项，这是正常的，OSS 会自动处理浏览器预检请求。服务器端 SDK
+上传成功并不能证明浏览器路径可用，因为后端访问不受浏览器 CORS 限制。
+
 ### `POST /api/oss/proxy-upload`
 
 需要会话 Cookie。Multipart 字段：

@@ -58,6 +58,50 @@ permissions.
 | `[queue]` | Task TTL, per-user limit, and ETA estimate |
 | `[static]` | Upload cache and optional deployment-provided demo directory |
 
+## OSS Browser Access and CORS
+
+The Logic and GPU services access OSS server-to-server with the OSS SDK, so
+their own requests do not depend on browser CORS. The browser does need CORS
+for two normal-path operations:
+
+- `POST` direct upload to the OSS policy URL;
+- `GET` the signed result URL so JavaScript can read the ciphertext and decrypt
+  it locally before displaying or downloading the image.
+
+Configure CORS on the exact bucket referenced by the protected OSS JSON file.
+A newly created bucket or a bucket moved to another OSS user does not
+automatically inherit the old bucket's CORS rules.
+
+Recommended rule:
+
+| Setting | Value |
+|---|---|
+| Allowed origin | The exact HTTPS deployment origin, for example `https://your-domain.example` |
+| Allowed methods | `GET`, `POST`, `PUT`, `DELETE`, `HEAD` |
+| Allowed headers | `*` |
+| Exposed headers | `ETag`, `Content-Type`, `Content-Length` |
+| Cache time | `600` seconds is a reasonable starting value |
+
+The Aliyun console may not show `OPTIONS` as an editable method. That is
+normal: the browser's preflight request is handled by OSS automatically. The
+application uses `credentials: omit` for cross-origin signed-result fetches;
+an exact origin is still recommended instead of `*` for production.
+
+To verify a saved rule, send an `Origin` header to a short-lived signed result
+URL without putting the URL in source control or logs:
+
+```bash
+curl -I \
+  -H 'Origin: https://your-domain.example' \
+  'https://bucket.example.invalid/path/to/signed-result'
+```
+
+The response should contain `Access-Control-Allow-Origin` with the deployment
+origin and include `GET` in `Access-Control-Allow-Methods`. If CORS is
+missing, generation can still finish successfully on the GPU, but the browser
+cannot read the encrypted result; the page shows a broken image and a direct
+download contains ciphertext rather than a viewable JPEG.
+
 ## Deployment Boundary
 
 ```text

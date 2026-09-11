@@ -410,7 +410,7 @@ npm run dev         # 本地开发，proxy /api → 127.0.0.1:8000
 ### 12.5 OSS
 
 - OSS 桶和 `input`/`output` 前缀由受保护配置注入；不要写入公开文档中的真实值。
-- CORS：允许部署域名，`AllowedMethods=['GET','POST','PUT','HEAD']`（必须含 GET，浏览器解密结果要 fetch 密文）。
+- CORS：在受保护配置所引用的准确 Bucket 上允许精确的 HTTPS 部署域名；允许方法为 `GET`、`POST`、`PUT`、`DELETE`、`HEAD`，允许 Headers 为 `*`，并暴露 `ETag`、`Content-Type`、`Content-Length`。控制台不提供 `OPTIONS` 选项是正常的，OSS 会自动处理预检请求。服务器端 OSS 检查成功不等于浏览器跨域读取成功；更换 OSS 用户或 Bucket 后必须重新验证 CORS。
 
 ---
 

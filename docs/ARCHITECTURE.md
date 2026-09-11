@@ -354,6 +354,15 @@ maps that key to `/api/relay/result/{id}`, checks task ownership and TTL, then
 streams the ciphertext to the browser. The browser decrypts both output paths
 the same way.
 
+On the normal OSS path, the signed URL is fetched by browser JavaScript rather
+than inserted directly as a plaintext image URL. Therefore the result bucket
+must allow the exact frontend HTTPS origin through CORS, including `GET` (and
+the upload path normally needs `POST`). Without this rule, server-side OSS
+health checks and GPU inference can succeed while the browser cannot read the
+ciphertext; the visible symptom is a broken image and an unopenable downloaded
+file. See [Logic service configuration](LOGIC_SERVICE_CONFIG.md#oss-browser-access-and-cors)
+for the deployment rule and verification command.
+
 ## 10. Local archive
 
 When enabled, each inference is saved under:
@@ -419,6 +428,19 @@ python -m logic_service.main --config /etc/anomaly-gen/logic.toml
 Nginx serves the built frontend and proxies `/api/` and `/cache/` to the logic
 service. The example unit files in `deploy/` provide a systemd deployment
 shape; the GPU port and SSH listener should remain private.
+
+### 12.4 OSS CORS
+
+Configure CORS on the exact bucket used by the protected OSS configuration:
+
+- allowed origin: the exact HTTPS frontend origin;
+- allowed methods: `GET`, `POST`, `PUT`, `DELETE`, `HEAD`;
+- allowed headers: `*`;
+- exposed headers: `ETag`, `Content-Type`, `Content-Length`.
+
+The Aliyun console may not list `OPTIONS`; OSS handles preflight requests
+automatically. Re-test with an `Origin` header after changing buckets or OSS
+users. A server-side OSS SDK check does not test browser CORS.
 
 ## 13. API summary
 

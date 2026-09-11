@@ -55,6 +55,48 @@ LOGIC_CONFIG_PATH=/etc/anomaly-gen/logic.toml \
 | `[queue]` | 任务 TTL、单用户任务上限和预计等待时间 |
 | `[static]` | 上传缓存和由部署环境提供的可选 demo 目录 |
 
+## OSS 浏览器访问与 CORS
+
+逻辑层和 GPU 服务通过 OSS SDK 以服务器到服务器的方式访问 OSS，因此
+它们自身的请求不依赖浏览器 CORS。但正常路径下，浏览器有两类请求需要
+OSS 允许跨域：
+
+- 使用 OSS 策略 URL 进行 `POST` 直传；
+- 使用签名结果 URL 进行 `GET`，让 JavaScript 读取密文并在本地解密，之后
+  才能显示或下载图片。
+
+请在受保护 OSS JSON 配置文件所引用的**准确 Bucket**上配置 CORS。新建
+Bucket，或切换到另一位 OSS 用户后，新 Bucket 不会自动继承旧 Bucket 的
+CORS 规则。
+
+推荐配置：
+
+| 配置项 | 值 |
+|---|---|
+| 允许来源 | 精确的 HTTPS 部署域名，例如 `https://your-domain.example` |
+| 允许方法 | `GET`、`POST`、`PUT`、`DELETE`、`HEAD` |
+| 允许 Headers | `*` |
+| 暴露 Headers | `ETag`、`Content-Type`、`Content-Length` |
+| 缓存时间 | 可先设置为 `600` 秒 |
+
+阿里云控制台可能不会把 `OPTIONS` 列为可编辑方法，这是正常的：浏览器
+发起的预检请求由 OSS 自动处理。应用对跨域签名 URL 使用
+`credentials: omit`；生产环境仍建议填写精确来源，不要使用 `*`。
+
+验证保存后的规则时，可以给短生命周期的签名结果 URL 加上 `Origin` 请求头；
+不要把真实签名 URL 写入源码或日志：
+
+```bash
+curl -I \
+  -H 'Origin: https://your-domain.example' \
+  'https://bucket.example.invalid/path/to/signed-result'
+```
+
+响应中应出现部署域名对应的 `Access-Control-Allow-Origin`，并且
+`Access-Control-Allow-Methods` 包含 `GET`。如果 CORS 缺失，GPU 仍可能已经
+成功完成推理，但浏览器无法读取加密结果，于是页面显示破图，直接下载得到
+的也是密文而不是可打开的 JPEG。
+
 ## 部署边界
 
 ```text
